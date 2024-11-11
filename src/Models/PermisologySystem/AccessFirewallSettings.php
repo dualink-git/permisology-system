@@ -1,4 +1,5 @@
 <?php
+
 // app/Models/AccessFirewallSettings.php
 
 namespace App\Models\PermisologySystem;

@@ -11,10 +11,10 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
 use Livewire\Features\SupportTesting\Testable;
+use PermisologySystem\PermisologySystem\Testing\TestsPermisologySystem;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use PermisologySystem\PermisologySystem\Testing\TestsPermisologySystem;
 
 class PermisologySystemServiceProvider extends PackageServiceProvider
 {
@@ -150,7 +150,7 @@ class PermisologySystemServiceProvider extends PackageServiceProvider
             '2_create_access_firewall_settings_table',
             '3_create_black_location_lists_table',
             '4_create_public_location_access_end_point_lists_table',
-            '5_create_user_location_access_end_point_lists_table'
+            '5_create_user_location_access_end_point_lists_table',
         ];
     }
 }

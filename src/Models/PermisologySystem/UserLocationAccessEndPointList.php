@@ -2,10 +2,9 @@
 
 namespace App\Models\PermisologySystem;
 
-use App\Models\PermisologySystem\UserPermisologySystem;
-use Spatie\Permission\Models\Role;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role;
 
 class UserLocationAccessEndPointList extends Model
 {
@@ -36,10 +35,8 @@ class UserLocationAccessEndPointList extends Model
         return $this->belongsTo(Role::class);
     }
 
-     /**
+    /**
      * Devuelve las direcciones DNS asociadas al usuario o al rol.
-     *
-     * @return array
      */
     public function getDnsAddresses(): array
     {

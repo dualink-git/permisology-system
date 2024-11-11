@@ -9,14 +9,14 @@ class UserPermisologySystem extends User
 {
     use HasRoles;
 
-     /**
+    /**
      * Especifica la tabla 'users' para que no se busque una tabla exclusiva para UserPermisologySystem.
      *
      * @var string
      */
     protected $table = 'users';
 
-      /**
+    /**
      * Define el guard 'web' para la gestión de roles y permisos.
      *
      * @var string
@@ -33,11 +33,8 @@ class UserPermisologySystem extends User
         return $this->getAllPermissions();
     }
 
-
-     /**
+    /**
      * Obtiene todas las direcciones DNS asociadas al usuario o a sus roles.
-     *
-     * @return array
      */
     public function getAllDnsAddresses(): array
     {
@@ -47,7 +44,7 @@ class UserPermisologySystem extends User
         // Obtener todos los registros UserLocationAccessEndPointList asociados al usuario o a sus roles
         $userLocationAccessLists = UserLocationAccessEndPointList::where(function ($query) use ($roleIds) {
             $query->where('user_id', $this->id)
-                  ->orWhereIn('role_id', $roleIds);
+                ->orWhereIn('role_id', $roleIds);
         })->get();
 
         // Combinar todas las direcciones DNS en un solo array
@@ -65,8 +62,6 @@ class UserPermisologySystem extends User
 
     /**
      * Obtiene todas las direcciones IP (individuales y rangos CIDR) asociadas al usuario o a sus roles.
-     *
-     * @return array
      */
     public function getAllIpAddresses(): array
     {
@@ -76,7 +71,7 @@ class UserPermisologySystem extends User
         // Obtener todos los registros UserLocationAccessEndPointList asociados al usuario o a sus roles
         $userLocationAccessLists = UserLocationAccessEndPointList::where(function ($query) use ($roleIds) {
             $query->where('user_id', $this->id)
-                  ->orWhereIn('role_id', $roleIds);
+                ->orWhereIn('role_id', $roleIds);
         })->get();
 
         // Combinar todas las direcciones IP en un solo array
@@ -100,8 +95,7 @@ class UserPermisologySystem extends User
     /**
      * Verifica si una dirección es un rango CIDR válido.
      *
-     * @param string $ip
-     * @return bool
+     * @param  string  $ip
      */
     public static function isValidCidr($ip): bool
     {
@@ -111,8 +105,7 @@ class UserPermisologySystem extends User
     /**
      * Verifica si una dirección es una IP válida.
      *
-     * @param string $ip
-     * @return bool
+     * @param  string  $ip
      */
     public static function isValidIp($ip): bool
     {

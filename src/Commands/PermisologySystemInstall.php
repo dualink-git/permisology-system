@@ -2,20 +2,19 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
-use Illuminate\Console\Command;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Artisan;
+use App\Models\PermisologySystem\AccessFirewallSettings;
 use App\Models\PermisologySystem\Permission;
 use App\Models\PermisologySystem\UserPermisologySystem;
-use App\Models\PermisologySystem\AccessFirewallSettings;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Role;
 
 class PermisologySystemInstall extends Command
 {
     protected $signature = 'permisology-system:install';
-    protected $description = 'Install the Permisology System with necessary configurations';
 
+    protected $description = 'Install the Permisology System with necessary configurations';
 
     public function handle()
     {
@@ -25,8 +24,9 @@ class PermisologySystemInstall extends Command
         $this->installDependencies();
 
         // 1. Verificar que Filament y los paneles estén instalados
-        if (!$this->isFilamentInstalled()) {
+        if (! $this->isFilamentInstalled()) {
             $this->error('Filament is not installed. Please install Filament using "composer require filament/filament" before running this command.');
+
             return Command::FAILURE;
         }
 
@@ -37,7 +37,6 @@ class PermisologySystemInstall extends Command
         $this->info('Add active field in users if it does not exist...');
         $this->addActiveFieldIfNeeded();
 
-
         // 2. Crear rol y permisos necesarios
         $this->info('Setting up roles and permissions...');
         $this->setupRolesAndPermissions();
@@ -46,13 +45,14 @@ class PermisologySystemInstall extends Command
         $this->registerMiddleware();
 
         $this->info('Permisology System installation completed successfully!');
+
         return Command::SUCCESS;
     }
 
     private function installDependencies()
     {
         // Opción para instalar Filament en require o require-dev
-        if (!class_exists('Filament\FilamentServiceProvider')) {
+        if (! class_exists('Filament\FilamentServiceProvider')) {
             $filamentInstallInDev = $this->confirm('Do you want to install Filament only for development?', true);
             $filamentCommand = $filamentInstallInDev
                 ? 'composer require filament/filament:"^3.2" --dev -W'
@@ -62,7 +62,7 @@ class PermisologySystemInstall extends Command
         }
 
         // Opción para instalar Ignition en require o require-dev
-        if (!class_exists('Spatie\LaravelIgnition\LaravelIgnitionServiceProvider')) {
+        if (! class_exists('Spatie\LaravelIgnition\LaravelIgnitionServiceProvider')) {
             $ignitionInstallInDev = $this->confirm('Do you want to install Spatie Laravel Ignition only for development?', true);
             $ignitionCommand = $ignitionInstallInDev
                 ? 'composer require spatie/laravel-ignition:"^2.0" --dev'
@@ -84,7 +84,7 @@ class PermisologySystemInstall extends Command
         $permission = Permission::firstOrCreate([
             'name' => 'Super Admin Permissions',
             'guard_name' => 'web',
-            'manual_routes' => ["$adminRoute/*", "*"],
+            'manual_routes' => ["$adminRoute/*", '*'],
         ]);
 
         // Crear rol "Super Admin"
@@ -113,8 +113,6 @@ class PermisologySystemInstall extends Command
                 'active' => true,
             ]);
 
-
-
             $this->info("User {$user->name} created.");
         } else {
             $this->info('Available users:');
@@ -126,8 +124,9 @@ class PermisologySystemInstall extends Command
 
             if ($userId) {
                 $user = UserPermisologySystem::find($userId);
-                if (!$user) {
+                if (! $user) {
                     $this->error("User with ID {$userId} not found.");
+
                     return;
                 }
             } else {
@@ -158,7 +157,7 @@ class PermisologySystemInstall extends Command
 
     private function addActiveFieldIfNeeded()
     {
-        if (!Schema::hasColumn('users', 'active')) {
+        if (! Schema::hasColumn('users', 'active')) {
             // Crear una migración temporal para agregar el campo `active`
             Schema::table('users', function ($table) {
                 $table->boolean('active')->default(true)->after('password');
@@ -168,7 +167,6 @@ class PermisologySystemInstall extends Command
             $this->info('The "active" column already exists in the "users" table.');
         }
     }
-
 
     private function registerMiddleware()
     {

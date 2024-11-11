@@ -35,14 +35,15 @@ class MakeServiceCommand extends Command
 
         $path = app_path("/Services/{$name}.php");
 
-        $directoryPath = app_path("Services/" . implode('/', $parts));
-        if (!is_dir($directoryPath)) {
+        $directoryPath = app_path('Services/' . implode('/', $parts));
+        if (! is_dir($directoryPath)) {
             mkdir($directoryPath, 0755, true); // Asegúrate de que existe el directorio
         }
 
         $filePath = $directoryPath . "/{$name}.php";
         if (file_exists($filePath)) {
             $this->error("The service {$name} already exists.");
+
             return;
         }
 
