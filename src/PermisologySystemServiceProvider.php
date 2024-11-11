@@ -1,7 +1,8 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace PermisologySystem\PermisologySystem;
 
+use App\Console\Commands\PermisologySystemInstall;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -13,14 +14,13 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
-use VendorName\Skeleton\Testing\TestsSkeleton;
+use PermisologySystem\PermisologySystem\Testing\TestsPermisologySystem;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class PermisologySystemServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'skeleton';
+    public static string $name = 'permisology-system';
 
-    public static string $viewNamespace = 'skeleton';
+    public static string $viewNamespace = 'permisology-system';
 
     public function configurePackage(Package $package): void
     {
@@ -36,7 +36,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
                     ->publishConfigFile()
                     ->publishMigrations()
                     ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub(':vendor_slug/:package_slug');
+                    ->askToStarRepoOnGitHub('dualink/permisology-system');
             });
 
         $configFileName = $package->shortName();
@@ -80,18 +80,18 @@ class SkeletonServiceProvider extends PackageServiceProvider
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/skeleton/{$file->getFilename()}"),
-                ], 'skeleton-stubs');
+                    $file->getRealPath() => base_path("stubs/permisology-system/{$file->getFilename()}"),
+                ], 'permisology-system-stubs');
             }
         }
 
         // Testing
-        Testable::mixin(new TestsSkeleton);
+        Testable::mixin(new TestsPermisologySystem);
     }
 
     protected function getAssetPackageName(): ?string
     {
-        return ':vendor_slug/:package_slug';
+        return 'dualink/permisology-system';
     }
 
     /**
@@ -100,9 +100,9 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('skeleton', __DIR__ . '/../resources/dist/components/skeleton.js'),
-            Css::make('skeleton-styles', __DIR__ . '/../resources/dist/skeleton.css'),
-            Js::make('skeleton-scripts', __DIR__ . '/../resources/dist/skeleton.js'),
+            // AlpineComponent::make('permisology-system', __DIR__ . '/../resources/dist/components/permisology-system.js'),
+            Css::make('permisology-system-styles', __DIR__ . '/../resources/dist/permisology-system.css'),
+            Js::make('permisology-system-scripts', __DIR__ . '/../resources/dist/permisology-system.js'),
         ];
     }
 
@@ -112,7 +112,7 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            SkeletonCommand::class,
+            PermisologySystemInstall::class,
         ];
     }
 
@@ -146,7 +146,11 @@ class SkeletonServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_skeleton_table',
+            '1_allowed_routes_to_permissions_table',
+            '2_create_access_firewall_settings_table',
+            '3_create_black_location_lists_table',
+            '4_create_public_location_access_end_point_lists_table',
+            '5_create_user_location_access_end_point_lists_table'
         ];
     }
 }
