@@ -2,19 +2,27 @@
 
 namespace PermisologySystem\PermisologySystem;
 
-use App\Console\Commands\PermisologySystemInstall;
-use Filament\Support\Assets\AlpineComponent;
-use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Facades\FilamentIcon;
+use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Asset;
 use Illuminate\Filesystem\Filesystem;
+<<<<<<< HEAD
 use Livewire\Features\SupportTesting\Testable;
 use PermisologySystem\PermisologySystem\Testing\TestsPermisologySystem;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
+=======
+>>>>>>> 55bc5e3 (Changin composer.json)
 use Spatie\LaravelPackageTools\Package;
+use Filament\Support\Facades\FilamentIcon;
+use Filament\Support\Facades\FilamentAsset;
+use Livewire\Features\SupportTesting\Testable;
+use PermisologySystem\Commands\PermisologySystemInstall;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+<<<<<<< HEAD
+=======
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
+use PermisologySystem\PermisologySystem\Testing\TestsPermisologySystem;
+>>>>>>> 55bc5e3 (Changin composer.json)
 
 class PermisologySystemServiceProvider extends PackageServiceProvider
 {

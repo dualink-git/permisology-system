@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace PermisologySystem\Commands;
 
 use App\Models\PermisologySystem\AccessFirewallSettings;
 use App\Models\PermisologySystem\Permission;
