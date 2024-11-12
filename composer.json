@@ -44,12 +44,12 @@
     "autoload": {
         "psr-4": {
             "PermisologySystem\\": "src/",
-            "PermisologySystem\\PermisologySystem\\Database\\Factories\\": "database/factories/"
+            "PermisologySystem\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "PermisologySystem\\PermisologySystem\\Tests\\": "tests/"
+            "PermisologySystem\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -69,10 +69,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "PermisologySystem\\PermisologySystem\\PermisologySystemServiceProvider"
+                "PermisologySystem\\PermisologySystemServiceProvider"
             ],
             "aliases": {
-                "PermisologySystem": "PermisologySystem\\PermisologySystem\\Facades\\PermisologySystem"
+                "PermisologySystem": "PermisologySystem\\Facades\\PermisologySystem"
             }
         }
     },
