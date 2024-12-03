@@ -11,7 +11,8 @@
         "issues": "https://github.com/dualink-git/permisology-system/issues",
         "source": "https://github.com/dualink-git/permisology-system"
     },
-    "license": "MIT",
+    "license": "CC-BY-NC-4.0",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "Joaquín D. Giuliano",
@@ -62,6 +63,9 @@
         }
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        },
         "laravel": {
             "providers": [
                 "PermisologySystem\\PermisologySystem\\PermisologySystemServiceProvider"
