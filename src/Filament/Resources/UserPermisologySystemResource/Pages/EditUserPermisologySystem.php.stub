@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\UserPermisologySystemResource\Pages;
+
+use App\Filament\Resources\UserPermisologySystemResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+class EditUserPermisologySystem extends EditRecord
+{
+    protected static string $resource = UserPermisologySystemResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+}

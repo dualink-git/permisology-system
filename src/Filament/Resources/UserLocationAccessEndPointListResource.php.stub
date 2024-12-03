@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use Closure;
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Spatie\Permission\Models\Role;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use App\Filament\Services\RouteService;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TagsInput;
+use PermisologySystem\PermisologySystem\Services\PermissionService;;
+use App\Filament\Resources\UserLocationAccessEndPointListResource\Pages;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\UserPermisologySystem;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\AccessFirewallSettings;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\UserLocationAccessEndPointList;
+
+class UserLocationAccessEndPointListResource extends Resource
+{
+    protected static ?string $model = UserLocationAccessEndPointList::class;
+    protected static ?string $navigationLabel = 'User Location Access Lists';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'Firewall Settings';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $adminRoute = config('filament.path', 'admin');
+        $className = static::class;
+        $route = str_replace(['App\\Filament\\Resources\\', 'Resource'], '', $className);
+        $route = strtolower($route);
+        $routePath = "$adminRoute/{$route}s";
+        return PermissionService::hasAccessToAdminRoute($routePath);
+    }
+
+    public static function form(Form $form): Form
+    {
+        $settings = AccessFirewallSettings::first(); // Para verificar la configuración
+
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('name')
+                    ->label('Location Name')
+                    ->required()
+                    ->placeholder('Enter list name')
+                    ->helperText('The identifier name for this user-specific access list.'),
+
+                Radio::make('association_type')
+                    ->label('Association Type')
+                    ->options([
+                        'user' => 'User',
+                        'role' => 'Role',
+                    ])
+                    ->required()
+                    ->default('user')
+                    ->reactive()
+                    ->afterStateUpdated(fn(callable $set) => $set('user_id', null) && $set('role_id', null)),
+
+                Select::make('user_id')
+                    ->label('User')
+                    ->options(UserPermisologySystem::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->nullable()
+                    ->visible(fn($get) => $get('association_type') === 'user'),
+
+                Select::make('role_id')
+                    ->label('Role')
+                    ->options(Role::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->nullable()
+                    ->visible(fn($get) => $get('association_type') === 'role'),
+
+                TagsInput::make('ip_addresses')
+                    ->label('IP Access List')
+                    ->placeholder('Add IP addresses...')
+                    ->helperText('Define IP addresses for this user or role.')
+                    ->visible(fn() => $settings && $settings->enable_ip_location)
+                    ->rules([
+                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                            foreach ($value as $ip) {
+                                if (!UserPermisologySystem::isValidIp($ip) && !UserPermisologySystem::isValidCidr($ip)) {
+                                    $fail("The IP address $ip is not a valid IPv4 address or CIDR range.");
+                                }
+                            }
+                        },
+                    ]),
+
+                TagsInput::make('dns_addresses')
+                    ->label('DNS Access List')
+                    ->placeholder('Add DNS addresses...')
+                    ->helperText('Define DNS addresses for this user or role.')
+                    ->visible(fn() => $settings && $settings->enable_dns_location),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')->label('List Name')->sortable(),
+                TextColumn::make('user.name')->label('User')->sortable(),
+                TextColumn::make('role.name')->label('Role')->sortable(),
+                TextColumn::make('created_at')->dateTime()->sortable()->label('Created At'),
+                TextColumn::make('updated_at')->dateTime()->sortable()->label('Updated At'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListUserLocationAccessEndPointLists::route('/'),
+            'create' => Pages\CreateUserLocationAccessEndPointList::route('/create'),
+            'edit' => Pages\EditUserLocationAccessEndPointList::route('/{record}/edit'),
+        ];
+    }
+}

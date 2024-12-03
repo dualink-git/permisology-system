@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Filament\Resources\BlackLocationListResource\Pages;
+
+use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\BlackLocationListResource;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\BlackLocationList;
+
+class CreateBlackLocationList extends CreateRecord
+{
+    protected static string $resource = BlackLocationListResource::class;
+
+    protected function handleRecordCreation(array $data): BlackLocationList
+    {
+        $blacklistName = $data['blacklist_name'];
+        $ipAddresses = $data['ip_addresses'] ?? [];
+        $dnsAddresses = $data['dns_addresses'] ?? [];
+
+        // Crear registros separados para cada IP
+        foreach ($ipAddresses as $ip) {
+            BlackLocationList::create([
+                'blacklist_name' => $blacklistName,
+                'type_address' => 'ip',
+                'address' => $ip,
+            ]);
+        }
+
+        // Crear registros separados para cada DNS
+        foreach ($dnsAddresses as $dns) {
+            BlackLocationList::create([
+                'blacklist_name' => $blacklistName,
+                'type_address' => 'dns',
+                'address' => $dns,
+            ]);
+        }
+
+        return new BlackLocationList(['blacklist_name' => $blacklistName]);
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        // Redirigir a la página de índice después de la creación
+        return BlackLocationListResource::getUrl('index');
+    }
+}

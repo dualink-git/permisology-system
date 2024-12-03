@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Filament\Resources\UserPermisologySystemResource\Pages;
+
+use App\Filament\Resources\UserPermisologySystemResource;
+use Filament\Actions;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateUserPermisologySystem extends CreateRecord
+{
+    protected static string $resource = UserPermisologySystemResource::class;
+}

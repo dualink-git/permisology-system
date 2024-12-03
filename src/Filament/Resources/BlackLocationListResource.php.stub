@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
+use App\Filament\Resources\BlackLocationListResource\Pages;
+use PermisologySystem\PermisologySystem\Services\PermissionService;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\BlackLocationList;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\AccessFirewallSettings;
+
+class BlackLocationListResource extends Resource
+{
+    protected static ?string $model = BlackLocationList::class;
+    protected static ?string $navigationLabel = 'Black Location Lists';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-exclamation';
+    protected static ?string $navigationGroup = 'Firewall Settings';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $settingsFlag = false;
+        // Verifica si alguna configuración está activada en AccessFirewallSettings
+        $settings = AccessFirewallSettings::first();
+        if($settings && ($settings->enable_ip_location || $settings->enable_dns_location)){
+            $settingsFlag = true;
+        }
+
+        $adminRoute = config('filament.path', 'admin');
+        $className = static::class;
+        $route = str_replace(['App\\Filament\\Resources\\', 'Resource'], '', $className);
+        $route = strtolower($route);
+        $routePath = "$adminRoute/{$route}s";
+        return PermissionService::hasAccessToAdminRoute($routePath) && $settingsFlag;
+    }
+
+    public static function form(Forms\Form $form): Forms\Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('blacklist_name')
+                    ->label('Blacklist Name')
+                    ->required()
+                    ->placeholder('Enter blacklist name'),
+
+                TagsInput::make('ip_addresses')
+                    ->label('IP Addresses')
+                    ->placeholder('Add IP addresses...'),
+
+                TagsInput::make('dns_addresses')
+                    ->label('DNS Addresses')
+                    ->placeholder('Add DNS addresses...'),
+            ]);
+    }
+
+    public static function table(Tables\Table $table): Tables\Table
+    {
+        return $table
+            ->query(
+                BlackLocationList::query()
+                    ->whereIn('id', function ($query) {
+                        $query->selectRaw('MIN(id)')
+                              ->from('black_location_lists')
+                              ->groupBy('blacklist_name');
+                    })
+            )
+            ->columns([
+                TextColumn::make('blacklist_name')
+                    ->label('Blacklist Name')
+                    ->sortable(),
+
+                TextColumn::make('type_address')
+                    ->label('Type Address')
+                    ->sortable(),
+
+                TextColumn::make('address')
+                    ->label('Address')
+                    ->sortable(),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ]);
+    }
+
+
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListBlackLocationLists::route('/'),
+            'create' => Pages\CreateBlackLocationList::route('/create'),
+            'edit' => Pages\EditBlackLocationList::route('/{record}/edit'),
+        ];
+    }
+}

@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Filament\Resources\PermissionResource\Pages;
+
+use App\Filament\Resources\PermissionResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Notifications\Notification;
+
+class EditPermission extends EditRecord
+{
+    protected static string $resource = PermissionResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make()
+                ->before(function ($record) {
+                    if ($record->name === 'Super Admin Permissions') {
+                        Notification::make()
+                            ->title('Action Not Allowed')
+                            ->body('The Super Admin Permissions permission cannot be deleted.')
+                            ->danger()
+                            ->send();
+
+                        $this->halt();
+                    }
+                }),
+        ];
+    }
+
+    protected function beforeSave(): void
+    {
+        if ($this->record->name === 'Super Admin Permissions') {
+            Notification::make()
+                ->title('Action Not Allowed')
+                ->body('The Super Admin Permissions permission cannot be modified.')
+                ->warning()
+                ->send();
+
+            $this->halt();
+        }
+    }
+}

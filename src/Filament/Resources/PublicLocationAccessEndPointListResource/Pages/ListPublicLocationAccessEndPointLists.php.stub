@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\PublicLocationAccessEndPointListResource\Pages;
+
+use App\Filament\Resources\PublicLocationAccessEndPointListResource;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+
+class ListPublicLocationAccessEndPointLists extends ListRecords
+{
+    protected static string $resource = PublicLocationAccessEndPointListResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make(),
+        ];
+    }
+}

@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Filament\Resources\UserLocationAccessEndPointListResource\Pages;
+
+use App\Filament\Resources\UserLocationAccessEndPointListResource;
+use Filament\Actions;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateUserLocationAccessEndPointList extends CreateRecord
+{
+    protected static string $resource = UserLocationAccessEndPointListResource::class;
+}

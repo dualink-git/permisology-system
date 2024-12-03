@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Filament\Resources\RolesResource\Pages;
+
+use App\Filament\Resources\RolesResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Notifications\Notification;
+
+class EditRoles extends EditRecord
+{
+    protected static string $resource = RolesResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make()
+                ->before(function ($record) {
+                    if ($record->name === 'Super Admin') {
+                        Notification::make()
+                            ->title('Action Not Allowed')
+                            ->body('The Super Admin role cannot be deleted.')
+                            ->danger()
+                            ->send();
+
+                        $this->halt(); // Detiene la ejecución de la acción para evitar eliminación
+                    }
+                }),
+        ];
+    }
+
+    protected function beforeSave(): void
+    {
+        if ($this->record->name === 'Super Admin') {
+            Notification::make()
+                ->title('Action Not Allowed')
+                ->body('The Super Admin role cannot be modified.')
+                ->warning()
+                ->send();
+
+            $this->halt(); // Detiene el guardado para proteger el rol
+        }
+    }
+}

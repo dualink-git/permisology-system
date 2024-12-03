@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use Filament\Pages\Page;
+use PermisologySystem\PermisologySystem\Services\PermissionService;
+use Filament\Notifications\Notification;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\AccessFirewallSettings;
+
+class AccessFirewallSettingsPage extends Page
+{
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationLabel = 'Access Firewall Settings';
+    protected static ?string $navigationGroup = 'Firewall Settings';
+    protected static string $view = 'filament.pages.access-firewall-settings';
+    protected static ?string $model = AccessFirewallSettings::class;
+
+    // Propiedades para enlazar con el modelo
+    public $enable_ip_location;
+    public $enable_dns_location;
+    public $enable_monitoring_control;
+    public $enable_unknown_ip_alert;
+    public $api_base_path;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $adminRoute = config('filament.path', 'admin');
+        $className = static::class;
+        $route = str_replace(['App\\Filament\\Resources\\', 'Resource'], '', $className);
+        $route = strtolower($route);
+        $routePath = "$adminRoute/{$route}s";
+        return PermissionService::hasAccessToAdminRoute($routePath);
+    }
+
+    // Cargar configuración al iniciar la página
+    public function mount()
+    {
+        $settings = AccessFirewallSettings::firstOrCreate([]);
+
+        // Asignar valores a las propiedades
+        $this->enable_ip_location = $settings->enable_ip_location ?? false;
+        $this->enable_dns_location = $settings->enable_dns_location ?? false;
+        $this->enable_monitoring_control = $settings->enable_monitoring_control ?? false;
+        $this->enable_unknown_ip_alert = $settings->enable_unknown_ip_alert ?? false;
+        $this->api_base_path = $settings->api_base_path ?? 'api/';
+
+    }
+
+    // Guardar configuraciones
+    public function save()
+    {
+        // Actualizar o crear el registro en la base de datos
+        $settings = AccessFirewallSettings::firstOrCreate([]);
+        $settings->update([
+            'enable_ip_location' => $this->enable_ip_location,
+            'enable_dns_location' => $this->enable_dns_location,
+            'enable_monitoring_control' => $this->enable_monitoring_control,
+            'enable_unknown_ip_alert' => $this->enable_unknown_ip_alert,
+            'api_base_path' => $this->api_base_path,
+        ]);
+
+        // Mostrar notificación
+        Notification::make()
+            ->title('Settings updated successfully!')
+            ->success()
+            ->send();
+
+        return redirect(request()->header('Referer'));
+    }
+}

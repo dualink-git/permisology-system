@@ -1,0 +1,134 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Spatie\Permission\Models\Role;
+use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
+use Filament\Tables\Columns\CheckboxColumn;
+use App\Filament\Resources\UserPermisologySystemResource\Pages;
+use PermisologySystem\PermisologySystem\Services\PermissionService;;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\UserPermisologySystem;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\AccessFirewallSettings;
+
+class UserPermisologySystemResource extends Resource
+{
+    protected static ?string $model = UserPermisologySystem::class;
+    protected static ?string $navigationGroup = 'People Management';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationLabel = 'Users';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $adminRoute = config('filament.path', 'admin');
+        $className = static::class;
+        $route = str_replace(['App\\Filament\\Resources\\', 'Resource'], '', $className);
+        $route = strtolower($route);
+        $routePath = "$adminRoute/{$route}s";
+        return PermissionService::hasAccessToAdminRoute($routePath);
+    }
+
+    public static function form(Form $form): Form
+    {
+        $settings = AccessFirewallSettings::first();
+        $superAdminId = $settings?->super_main_administrator_id;
+
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255)
+                    ->disabled(fn ($record) => $record && $record->id === $superAdminId),
+
+                Forms\Components\TextInput::make('email')
+                    ->email()
+                    ->required()
+                    ->maxLength(255)
+                    ->disabled(fn ($record) => $record && $record->id === $superAdminId),
+
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->maxLength(255)
+                    ->dehydrateStateUsing(fn ($state) => !empty($state) ? bcrypt($state) : null)
+                    ->required(fn ($record) => $record === null)
+                    ->label('Password')
+                    ->visible(fn ($livewire) => $livewire instanceof Pages\CreateUserPermisologySystem)
+                    ->helperText('Fill in only if you want to set a new password.'),
+
+                Select::make('roles')
+                    ->label('Assign Roles')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->options(Role::where('name', '!=', 'Super Admin')->pluck('name', 'id'))
+                    ->preload()
+                    ->required()
+                    ->disabled(fn ($record) => $record && $record->id === $superAdminId)
+                    ->helperText('Assign one or more roles to the user.'),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        $settings = AccessFirewallSettings::first();
+        $superAdminId = $settings?->super_main_administrator_id;
+
+        return $table
+            ->columns([
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('email')->searchable(),
+                TextColumn::make('roles.name')->label('Roles')->sortable(),
+                CheckboxColumn::make('active')->label('Active'),
+                TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+
+                Action::make('toggleActive')
+                    ->label(fn (UserPermisologySystem $record) => $record->active ? 'Deactivate' : 'Activate')
+                    ->action(function (UserPermisologySystem $record) use ($superAdminId) {
+                        if ($record->id === $superAdminId) {
+                            Notification::make()
+                                ->title('Action Not Allowed')
+                                ->body('The Super Admin user cannot be deactivated.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        $record->active = !$record->active;
+                        $record->save();
+
+                        Notification::make()
+                            ->title('User Status Updated')
+                            ->body("The user's active status has been successfully updated.")
+                            ->success()
+                            ->send();
+                    })
+                    ->icon(fn (UserPermisologySystem $record) => $record->active ? 'heroicon-o-pause-circle' : 'heroicon-o-user-plus')
+                    ->color(fn (UserPermisologySystem $record) => $record->active ? 'danger' : 'success')
+                    ->requiresConfirmation(),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListUserPermisologySystems::route('/'),
+            'create' => Pages\CreateUserPermisologySystem::route('/create'),
+            'edit' => Pages\EditUserPermisologySystem::route('/{record}/edit'),
+        ];
+    }
+}

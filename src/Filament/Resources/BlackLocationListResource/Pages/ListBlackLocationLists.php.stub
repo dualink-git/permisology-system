@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\BlackLocationListResource\Pages;
+
+use App\Filament\Resources\BlackLocationListResource;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+
+class ListBlackLocationLists extends ListRecords
+{
+    protected static string $resource = BlackLocationListResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make(),
+        ];
+    }
+}

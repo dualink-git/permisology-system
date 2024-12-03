@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use PermisologySystem\PermisologySystem\Services\PermissionService;;
+use App\Filament\Resources\PublicLocationAccessEndPointListResource\Pages;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\AccessFirewallSettings;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\PublicLocationAccessEndPointList;
+use PermisologySystem\PermisologySystem\Services\RouteService;
+
+class PublicLocationAccessEndPointListResource extends Resource
+{
+    protected static ?string $model = PublicLocationAccessEndPointList::class;
+    protected static ?string $navigationLabel = 'Public Location Access Lists';
+    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+    protected static ?string $navigationGroup = 'Firewall Settings';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $settingsFlag = false;
+        // Verifica si alguna configuración está activada en AccessFirewallSettings
+        $settings = AccessFirewallSettings::first();
+        if($settings && ($settings->enable_ip_location || $settings->enable_dns_location)){
+            $settingsFlag = true;
+        }
+
+        $adminRoute = config('filament.path', 'admin');
+        $className = static::class;
+        $route = str_replace(['App\\Filament\\Resources\\', 'Resource'], '', $className);
+        $route = strtolower($route);
+        $routePath = "$adminRoute/{$route}s";
+        return PermissionService::hasAccessToAdminRoute($routePath) && $settingsFlag;
+    }
+
+    public static function form(Form $form): Form
+    {
+        $settings = AccessFirewallSettings::first();
+
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('name')
+                    ->label('Location Name')
+                    ->required()
+                    ->placeholder('Enter location name')
+                    ->helperText('The identifier name for this access point list.'),
+                Select::make('route_selection_api')
+                    ->label('Available API Routes')
+                    ->options(RouteService::getFormattedApiRoutes())
+                    ->multiple()
+                    ->helperText('Select one or more routes from the list.')
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')->label('Location Name')->sortable(),
+                TextColumn::make('created_at')->dateTime()->sortable()->label('Created At'),
+                TextColumn::make('updated_at')->dateTime()->sortable()->label('Updated At'),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListPublicLocationAccessEndPointLists::route('/'),
+            'create' => Pages\CreatePublicLocationAccessEndPointList::route('/create'),
+            'edit' => Pages\EditPublicLocationAccessEndPointList::route('/{record}/edit'),
+        ];
+    }
+}

@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Filament\Resources\BlackLocationListResource\Pages;
+
+use Filament\Resources\Pages\Page;
+use Filament\Forms\Components\TagsInput;
+use App\Filament\Resources\BlackLocationListResource;
+use PermisologySystem\PermisologySystem\Models\PermisologySystem\BlackLocationList;
+
+class ManageBlackLocationList extends Page
+{
+    protected static string $resource = BlackLocationListResource::class;
+
+    // Definir la vista asociada a esta página
+    protected static string $view = 'filament.resources.black-location-list-resource.pages.manage-black-location-list';
+
+    public $blacklist_name;
+    public $ip_addresses = [];
+    public $dns_addresses = [];
+
+    public function mount($blacklist_name): void
+    {
+        $this->blacklist_name = $blacklist_name;
+
+        $records = BlackLocationList::where('blacklist_name', $blacklist_name)->get();
+        $this->ip_addresses = $records->where('type_address', 'ip')->pluck('address')->toArray();
+        $this->dns_addresses = $records->where('type_address', 'dns')->pluck('address')->toArray();
+    }
+
+    protected function getFormSchema(): array
+    {
+        return [
+            TagsInput::make('ip_addresses')
+                ->label('IP Addresses')
+                ->default($this->ip_addresses)
+                ->placeholder('Add IP addresses...'),
+
+            TagsInput::make('dns_addresses')
+                ->label('DNS Addresses')
+                ->default($this->dns_addresses)
+                ->placeholder('Add DNS addresses...'),
+        ];
+    }
+
+    public function save(): void
+    {
+        // Eliminar registros actuales
+        BlackLocationList::where('blacklist_name', $this->blacklist_name)->delete();
+
+        // Guardar IPs
+        foreach ($this->ip_addresses as $ip) {
+            BlackLocationList::create([
+                'blacklist_name' => $this->blacklist_name,
+                'type_address' => 'ip',
+                'address' => $ip,
+            ]);
+        }
+
+        // Guardar DNS
+        foreach ($this->dns_addresses as $dns) {
+            BlackLocationList::create([
+                'blacklist_name' => $this->blacklist_name,
+                'type_address' => 'dns',
+                'address' => $dns,
+            ]);
+        }
+
+        $this->notify('success', 'Blacklist updated successfully.');
+        $this->redirect(BlackLocationListResource::getUrl('index'));
+    }
+}

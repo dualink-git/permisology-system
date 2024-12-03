@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\UserLocationAccessEndPointListResource\Pages;
+
+use App\Filament\Resources\UserLocationAccessEndPointListResource;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+class EditUserLocationAccessEndPointList extends EditRecord
+{
+    protected static string $resource = UserLocationAccessEndPointListResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+}
